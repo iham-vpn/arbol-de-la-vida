@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="description" content="El Árbol de la Vida: las 10 Sephirot y sus astros, los 22 canales y sus signos, y el Tarot.">
+<meta property="og:title" content="El Árbol de la Vida viviente">
+<meta property="og:description" content="Cábala y astrología: diez esferas, diez astros; veintidós canales, veintidós arcanos.">
+<meta name="theme-color" content="#030308">
+</head>
+<body>
+<title>Árbol de la Vida · Astrología</title>
+<style>
+  :root{
+    --void:#030308; --ink:#ece9f6; --muted:#9793b8; --faint:#615d80;
+    --line:rgba(176,176,220,.13); --line-hi:rgba(200,190,255,.42);
+    --gold:#f3c667; --violet:#9a7bff;
+    --edge:rgba(150,140,210,.20);
+    /* base sphere colours (traditional scale) */
+    --k:#f4f2ff; --c:#b9bccb; --b:#8b79c4; --ch:#4d8bd6; --g:#e2504f;
+    --t:#f3c667; --n:#4fbf8f; --h:#f0954a; --y:#9a7bff; --m:#c0904e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      radial-gradient(46% 40% at 50% 44%, rgba(96,84,168,.20) 0%, rgba(60,54,120,.07) 42%, transparent 72%),
+      radial-gradient(120% 70% at 50% 8%, rgba(40,52,104,.16) 0%, transparent 58%),
+      radial-gradient(90% 55% at 84% 92%, rgba(78,30,74,.13) 0%, transparent 60%),
+      radial-gradient(80% 55% at 12% 96%, rgba(22,44,78,.12) 0%, transparent 60%),
+      radial-gradient(135% 120% at 50% 46%, transparent 38%, rgba(0,0,0,.62) 100%),
+      var(--void);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:"SF Pro Display",-apple-system,BlinkMacSystemFont,system-ui,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  #stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .stage{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;
+    min-height:100vh;padding:30px 14px 70px}
+  .masthead{text-align:center;margin-bottom:2px;max-width:660px}
+  .eyebrow{font-size:11px;letter-spacing:.42em;text-transform:uppercase;color:var(--faint);font-weight:500}
+  .masthead h1{font-weight:200;font-size:clamp(25px,3.6vw,38px);letter-spacing:.02em;margin:.28em 0 .12em;text-wrap:balance}
+  .masthead h1 b{font-weight:500;color:var(--gold)}
+  .masthead p{color:var(--muted);font-size:13px;font-weight:300;max-width:440px;margin:0 auto}
+  svg{width:min(760px,96vw);height:auto;display:block;margin-top:4px;overflow:visible}
+  .layers{display:inline-flex;gap:2px;margin-top:16px;padding:3px;border-radius:999px;
+    background:rgba(255,255,255,.04);border:1px solid var(--line)}
+  .layers button{appearance:none;background:none;border:0;color:var(--muted);font:inherit;font-size:12px;
+    letter-spacing:.14em;text-transform:uppercase;padding:8px 22px;border-radius:999px;cursor:pointer;transition:.25s}
+  .layers button[aria-pressed="true"]{background:linear-gradient(180deg,#2a2450,#1a1636);color:var(--ink);
+    box-shadow:0 0 0 1px var(--line-hi),0 6px 20px -8px #000}
+  .layers button:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+
+  /* nodes */
+  .node{cursor:pointer}
+  /* the glow is decorative only — it must never capture the pointer, or it
+     would steal hover from the channels running near each sphere */
+  .node .halo{opacity:.66;transition:opacity .4s,transform .4s;pointer-events:none}
+  .node:hover .halo{opacity:1;transform:scale(1.12)}
+  .node .disc{transition:transform .3s cubic-bezier(.2,.9,.3,1.3)}
+  .node:hover .disc{transform:scale(1.05)}
+  .node .spec{pointer-events:none;opacity:.9}
+  .node .ring{fill:none;pointer-events:none;opacity:.5;transition:opacity .3s}
+  .node:hover .ring{opacity:.95}
+  .node .glyph{font-weight:500;text-anchor:middle;dominant-baseline:central;pointer-events:none;
+    fill:#0a0712;paint-order:stroke;stroke:rgba(255,255,255,.30);stroke-width:.6px}
+  .node .name{font-size:12.5px;text-anchor:middle;fill:var(--ink);pointer-events:none;font-weight:400;
+    letter-spacing:.16em;text-transform:uppercase;transition:opacity .3s}
+  .node .astro{font-size:12px;text-anchor:middle;fill:var(--gold);pointer-events:none;font-weight:300;
+    letter-spacing:.03em;transition:opacity .3s}
+  .node .astro tspan.sym{font-size:13.5px}
+  .node .num{font-size:10px;text-anchor:middle;dominant-baseline:central;fill:rgba(10,7,18,.55);
+    pointer-events:none;font-weight:600}
+  /* paths */
+  .path-line{stroke:rgba(164,152,232,.42);stroke-width:1.7;fill:none;
+    filter:drop-shadow(0 0 2.5px rgba(150,138,224,.55));transition:stroke .3s,stroke-width .3s}
+  .path-hit{stroke:transparent;stroke-width:13;fill:none;cursor:pointer}
+  .channels .path-line{stroke:rgba(196,186,255,.62);stroke-width:1.5}
+  .path-g:hover .path-line{stroke:var(--gold);stroke-width:2.4;filter:drop-shadow(0 0 4px rgba(243,198,103,.7))}
+  .chan-badge{opacity:0;transition:opacity .3s;pointer-events:none}
+  .channels .chan-badge{opacity:1}
+  /* once visible, the badge is itself a target: a ~30px disc right where the eye
+     (and the finger) aims, instead of only the thin line underneath it */
+  .channels .chan-badge,.tarot .chan-badge{pointer-events:auto;cursor:pointer}
+  .chan-badge circle{fill:#0b0a1a;stroke:var(--line-hi);stroke-width:1.1}
+  .path-g:hover .chan-badge circle{stroke:var(--gold);fill:#171227}
+  .chan-badge text{font-size:15px;text-anchor:middle;dominant-baseline:central;fill:var(--ink);font-weight:400}
+  /* SF Pro has no zodiac glyphs, so the fallback grabs a colour-emoji font and the
+     signs render as coloured blobs. Pin a monochrome symbol face for every glyph. */
+  .chan-badge text,.node .glyph,.node .astro tspan.sym,#tip .arow .s{
+    font-family:"Apple Symbols","Segoe UI Symbol","Noto Sans Symbols 2","DejaVu Sans",serif}
+  /* dim the non-active layer */
+  .channels .node .disc{opacity:.42}
+  .channels .node .halo{opacity:.14}
+  .channels .node .glyph{opacity:.4}
+  .channels .node .name,.channels .node .astro{opacity:.28}
+  /* tarot layer: the spheres carry the pip numbers, so they stay more present
+     than in the channels view — both readings have to stay legible together */
+  .tarot .path-line{stroke:rgba(196,186,255,.62);stroke-width:1.5}
+  .tarot .chan-badge{opacity:1}
+  .tarot .node .disc{opacity:.6}
+  .tarot .node .halo{opacity:.2}
+  .tarot .node .glyph{opacity:.85}
+  .tarot .node .name,.tarot .node .astro{opacity:.6}
+  /* numerals read better in the UI face than in the symbol face */
+  .tarot .chan-badge circle{r:16;stroke:rgba(243,198,103,.45)}
+  .tarot .chan-badge text,.tarot .node .glyph{
+    font-family:"SF Pro Display",-apple-system,system-ui,sans-serif;font-weight:500}
+  /* gold on the channels, pale on the spheres — otherwise the 22 arcana numbers
+     and the 10 pip ranks read as one undifferentiated field of digits */
+  .tarot .chan-badge text{font-size:12.5px;fill:var(--gold)}
+  .daath{fill:none;stroke:var(--faint);stroke-dasharray:3 5;stroke-width:1;opacity:.5}
+  .daath-t{font-size:9px;fill:var(--faint);text-anchor:middle;letter-spacing:.2em}
+
+  /* tooltip */
+  #tip{position:fixed;z-index:9;pointer-events:none;opacity:0;transform:translateY(4px);
+    transition:opacity .18s,transform .18s;max-width:280px;
+    background:rgba(12,11,26,.94);backdrop-filter:blur(14px);border:1px solid var(--line-hi);
+    border-radius:14px;padding:15px 17px;box-shadow:0 18px 50px -14px #000}
+  #tip.on{opacity:1;transform:translateY(0)}
+  #tip .th{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+  #tip .heb{font-size:24px;font-weight:200;line-height:1}
+  #tip .tt{font-size:16px;font-weight:400;letter-spacing:.01em}
+  #tip .tt small{color:var(--muted);font-weight:300;font-size:12.5px}
+  #tip .arow{display:inline-flex;align-items:center;gap:7px;margin:8px 0 2px;font-size:14px}
+  #tip .arow .s{font-size:18px}
+  #tip .arow b{font-weight:500;color:var(--gold)}
+  #tip .meta{font-size:12px;line-height:1.55;color:var(--muted);font-weight:300;margin-top:8px}
+  #tip .meta b{color:var(--ink);font-weight:400}
+  #tip .src{font-size:10.5px;color:var(--faint);margin-top:9px;letter-spacing:.02em}
+  .hint{margin-top:22px;font-size:11.5px;color:var(--faint);font-weight:300;letter-spacing:.03em;text-align:center}
+  @media (max-width:640px){
+    .stage{padding:20px 10px 40px;justify-content:flex-start}
+    .masthead h1{font-size:24px}
+    .masthead p{font-size:12.5px}
+    svg{width:100%}
+    /* fingers, not cursors: ~44px tall targets, and a wider invisible band on the
+       channels (they scale down to ~7px of tappable line on a 360px phone) */
+    .layers{margin-top:14px}
+    .layers button{padding:15px 17px;font-size:12.5px}
+    .path-hit{stroke-width:24}
+    /* tooltip docks as a bottom sheet on touch screens */
+    #tip{left:10px;right:10px;bottom:12px;top:auto!important;max-width:none;
+      transform:translateY(120%);border-radius:16px;padding:16px 18px}
+    #tip.on{transform:translateY(0)}
+    .hint{margin-bottom:8px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<canvas id="stars"></canvas>
+<main class="stage">
+  <div class="masthead">
+    <div class="eyebrow">Cábala · Astrología</div>
+    <h1>El Árbol de la <b>Vida</b> viviente</h1>
+    <p>Diez esferas y veintidós canales. Tres lecturas del mismo árbol: los astros, los signos y el Tarot.</p>
+  </div>
+  <svg id="tree" viewBox="0 0 620 980" role="img" aria-label="Árbol de la Vida con correspondencias astrológicas"><defs><radialGradient id="grad-kether" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#ffffff" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--k)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--k)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-kether" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--k)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--k)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--k)" stop-opacity="0"></stop></radialGradient><radialGradient id="grad-chokmah" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#d9dce8" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--c)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--c)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-chokmah" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--c)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--c)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--c)" stop-opacity="0"></stop></radialGradient><radialGradient id="grad-binah" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#b6a6e6" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--b)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--b)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-binah" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--b)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--b)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--b)" stop-opacity="0"></stop></radialGradient><radialGradient id="grad-chesed" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#8fbef0" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--ch)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--ch)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-chesed" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--ch)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--ch)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--ch)" stop-opacity="0"></stop></radialGradient><radialGradient id="grad-geburah" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#f39190" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--g)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--g)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-geburah" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--g)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--g)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--g)" stop-opacity="0"></stop></radialGradient><radialGradient id="grad-tiphareth" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#ffe19a" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--t)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--t)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-tiphareth" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--t)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--t)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--t)" stop-opacity="0"></stop></radialGradient><radialGradient id="grad-netzach" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#86dcb4" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--n)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--n)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-netzach" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--n)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--n)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--n)" stop-opacity="0"></stop></radialGradient><radialGradient id="grad-hod" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#f7b578" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--h)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--h)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-hod" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--h)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--h)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--h)" stop-opacity="0"></stop></radialGradient><radialGradient id="grad-yesod" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#bda9ff" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--y)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--y)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-yesod" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--y)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--y)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--y)" stop-opacity="0"></stop></radialGradient><radialGradient id="grad-malkuth" cx="50%" cy="40%" r="66%"><stop offset="0%" stop-color="#e0b56b" stop-opacity="1"></stop><stop offset="58%" stop-color="var(--m)" stop-opacity=".96"></stop><stop offset="100%" stop-color="var(--m)" stop-opacity=".55"></stop></radialGradient><radialGradient id="halo-malkuth" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="var(--m)" stop-opacity=".85"></stop><stop offset="55%" stop-color="var(--m)" stop-opacity=".22"></stop><stop offset="100%" stop-color="var(--m)" stop-opacity="0"></stop></radialGradient><filter id="soft" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="9"></feGaussianBlur></filter><radialGradient id="treeAura" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#7a6cd0" stop-opacity=".18"></stop><stop offset="48%" stop-color="#4a4a96" stop-opacity=".06"></stop><stop offset="100%" stop-color="#4a4a96" stop-opacity="0"></stop></radialGradient></defs><g pointer-events="none"><ellipse cx="310" cy="500" rx="335" ry="470" fill="url(#treeAura)"></ellipse><circle cx="310" cy="496" r="150" fill="none" stroke="rgba(160,148,228,0.07)" stroke-width="1"></circle><circle cx="310" cy="496" r="255" fill="none" stroke="rgba(160,148,228,0.05700000000000001)" stroke-width="1"></circle><circle cx="310" cy="496" r="360" fill="none" stroke="rgba(160,148,228,0.04400000000000001)" stroke-width="1"></circle><circle cx="310" cy="496" r="470" fill="none" stroke="rgba(160,148,228,0.031000000000000007)" stroke-width="1"></circle></g><g><g class="path-g" data-i="0" tabindex="0" role="button" aria-label="Sendero Aleph, Aire"><line class="path-line" x1="310" y1="82" x2="494" y2="200"></line><g class="chan-badge"><circle cx="402" cy="141" r="14"></circle><text x="402" y="141.5">△︎</text></g><line class="path-hit" x1="352.9303991502681" y1="109.53145162897627" x2="452.7531459144483" y2="173.5482131407875"></line></g><g class="path-g" data-i="1" tabindex="0" role="button" aria-label="Sendero Beth, Mercurio"><line class="path-line" x1="310" y1="82" x2="126" y2="200"></line><g class="chan-badge"><circle cx="218" cy="141" r="14"></circle><text x="218" y="141.5">☿︎</text></g><line class="path-hit" x1="267.0696008497319" y1="109.53145162897627" x2="167.2468540855517" y2="173.5482131407875"></line></g><g class="path-g" data-i="2" tabindex="0" role="button" aria-label="Sendero Gimel, Luna"><line class="path-line" x1="310" y1="82" x2="310" y2="496"></line><g class="chan-badge"><circle cx="310" cy="289" r="14"></circle><text x="310" y="289.5">☽︎</text></g><line class="path-hit" x1="310" y1="133" x2="310" y2="440"></line></g><g class="path-g" data-i="3" tabindex="0" role="button" aria-label="Sendero Daleth, Venus"><line class="path-line" x1="494" y1="200" x2="126" y2="200"></line><g class="chan-badge"><circle cx="310" cy="200" r="14"></circle><text x="310" y="200.5">♀︎</text></g><line class="path-hit" x1="445" y1="200" x2="175" y2="200"></line></g><g class="path-g" data-i="4" tabindex="0" role="button" aria-label="Sendero Heh, Aries"><line class="path-line" x1="494" y1="200" x2="310" y2="496"></line><g class="chan-badge"><circle cx="402" cy="348" r="14"></circle><text x="402" y="348.5">♈︎</text></g><line class="path-hit" x1="468.13122806484455" y1="241.61498093916316" x2="339.56431078303484" y2="448.44002178381356"></line></g><g class="path-g" data-i="5" tabindex="0" role="button" aria-label="Sendero Vav, Tauro"><line class="path-line" x1="494" y1="200" x2="494" y2="404"></line><g class="chan-badge"><circle cx="494" cy="302" r="14"></circle><text x="494" y="302.5">♉︎</text></g><line class="path-hit" x1="494" y1="249" x2="494" y2="355"></line></g><g class="path-g" data-i="6" tabindex="0" role="button" aria-label="Sendero Zayin, Géminis"><line class="path-line" x1="126" y1="200" x2="310" y2="496"></line><g class="chan-badge"><circle cx="218" cy="348" r="14"></circle><text x="218" y="348.5">♊︎</text></g><line class="path-hit" x1="151.86877193515548" y1="241.61498093916316" x2="280.43568921696516" y2="448.44002178381356"></line></g><g class="path-g" data-i="7" tabindex="0" role="button" aria-label="Sendero Cheth, Cáncer"><line class="path-line" x1="126" y1="200" x2="126" y2="404"></line><g class="chan-badge"><circle cx="126" cy="302" r="14"></circle><text x="126" y="302.5">♋︎</text></g><line class="path-hit" x1="126" y1="249" x2="126" y2="355"></line></g><g class="path-g" data-i="8" tabindex="0" role="button" aria-label="Sendero Teth, Leo"><line class="path-line" x1="494" y1="404" x2="126" y2="404"></line><g class="chan-badge"><circle cx="310" cy="404" r="14"></circle><text x="310" y="404.5">♌︎</text></g><line class="path-hit" x1="445" y1="404" x2="175" y2="404"></line></g><g class="path-g" data-i="9" tabindex="0" role="button" aria-label="Sendero Yod, Virgo"><line class="path-line" x1="494" y1="404" x2="310" y2="496"></line><g class="chan-badge"><circle cx="402" cy="450" r="14"></circle><text x="402" y="450.5">♍︎</text></g><line class="path-hit" x1="450.17306764100414" y1="425.91346617949796" x2="360.0879226959953" y2="470.95603865200235"></line></g><g class="path-g" data-i="10" tabindex="0" role="button" aria-label="Sendero Kaph, Júpiter"><line class="path-line" x1="494" y1="404" x2="494" y2="632"></line><g class="chan-badge"><circle cx="494" cy="518" r="14"></circle><text x="494" y="518.5">♃︎</text></g><line class="path-hit" x1="494" y1="453" x2="494" y2="583"></line></g><g class="path-g" data-i="11" tabindex="0" role="button" aria-label="Sendero Lamed, Libra"><line class="path-line" x1="126" y1="404" x2="310" y2="496"></line><g class="chan-badge"><circle cx="218" cy="450" r="14"></circle><text x="218" y="450.5">♎︎</text></g><line class="path-hit" x1="169.82693235899586" y1="425.91346617949796" x2="259.9120773040047" y2="470.95603865200235"></line></g><g class="path-g" data-i="12" tabindex="0" role="button" aria-label="Sendero Mem, Agua"><line class="path-line" x1="126" y1="404" x2="126" y2="632"></line><g class="chan-badge"><circle cx="126" cy="518" r="14"></circle><text x="126" y="518.5">▽︎</text></g><line class="path-hit" x1="126" y1="453" x2="126" y2="583"></line></g><g class="path-g" data-i="13" tabindex="0" role="button" aria-label="Sendero Nun, Escorpio"><line class="path-line" x1="310" y1="496" x2="494" y2="632"></line><g class="chan-badge"><circle cx="402" cy="564" r="14"></circle><text x="402" y="564.5">♏︎</text></g><line class="path-hit" x1="355.0338639221142" y1="529.2858994206931" x2="454.59536906815003" y2="602.8748380068935"></line></g><g class="path-g" data-i="14" tabindex="0" role="button" aria-label="Sendero Samekh, Sagitario"><line class="path-line" x1="310" y1="496" x2="310" y2="724"></line><g class="chan-badge"><circle cx="310" cy="610" r="14"></circle><text x="310" y="610.5">♐︎</text></g><line class="path-hit" x1="310" y1="552" x2="310" y2="673"></line></g><g class="path-g" data-i="15" tabindex="0" role="button" aria-label="Sendero Ayin, Capricornio"><line class="path-line" x1="310" y1="496" x2="126" y2="632"></line><g class="chan-badge"><circle cx="218" cy="564" r="14"></circle><text x="218" y="564.5">♑︎</text></g><line class="path-hit" x1="264.9661360778858" y1="529.2858994206931" x2="165.40463093184997" y2="602.8748380068935"></line></g><g class="path-g" data-i="16" tabindex="0" role="button" aria-label="Sendero Peh, Marte"><line class="path-line" x1="494" y1="632" x2="126" y2="632"></line><g class="chan-badge"><circle cx="331" cy="632" r="14"></circle><text x="331" y="632.5">♂︎</text></g><line class="path-hit" x1="445" y1="632" x2="175" y2="632"></line></g><g class="path-g" data-i="17" tabindex="0" role="button" aria-label="Sendero Tzaddi, Acuario"><line class="path-line" x1="494" y1="632" x2="310" y2="724"></line><g class="chan-badge"><circle cx="402" cy="678" r="14"></circle><text x="402" y="678.5">♒︎</text></g><line class="path-hit" x1="450.17306764100414" y1="653.913466179498" x2="355.6157867409957" y2="701.1921066295022"></line></g><g class="path-g" data-i="18" tabindex="0" role="button" aria-label="Sendero Qoph, Piscis"><line class="path-line" x1="494" y1="632" x2="310" y2="894"></line><g class="chan-badge"><circle cx="402" cy="763" r="14"></circle><text x="402" y="763.5">♓︎</text></g><line class="path-hit" x1="465.83874725624656" y1="672.0991751025185" x2="342.759008293754" y2="847.3540207991111"></line></g><g class="path-g" data-i="19" tabindex="0" role="button" aria-label="Sendero Resh, Sol"><line class="path-line" x1="126" y1="632" x2="310" y2="724"></line><g class="chan-badge"><circle cx="218" cy="678" r="14"></circle><text x="218" y="678.5">☉︎</text></g><line class="path-hit" x1="169.82693235899586" y1="653.913466179498" x2="264.3842132590043" y2="701.1921066295022"></line></g><g class="path-g" data-i="20" tabindex="0" role="button" aria-label="Sendero Shin, Fuego"><line class="path-line" x1="126" y1="632" x2="310" y2="894"></line><g class="chan-badge"><circle cx="218" cy="763" r="14"></circle><text x="218" y="763.5">▲︎</text></g><line class="path-hit" x1="154.16125274375344" y1="672.0991751025185" x2="277.240991706246" y2="847.3540207991111"></line></g><g class="path-g" data-i="21" tabindex="0" role="button" aria-label="Sendero Tau, Saturno"><line class="path-line" x1="310" y1="724" x2="310" y2="894"></line><g class="chan-badge"><circle cx="310" cy="809" r="14"></circle><text x="310" y="809.5">♄︎</text></g><line class="path-hit" x1="310" y1="775" x2="310" y2="837"></line></g></g><g><circle class="daath" cx="310" cy="312" r="22"></circle><text class="daath-t" x="310" y="316">דעת</text></g><g><g class="node" data-key="kether" tabindex="0" role="button" aria-label="Kether, Neptuno"><circle class="halo" cx="310" cy="82" r="102.5" fill="url(#halo-kether)" filter="url(#soft)"></circle><circle class="disc" cx="310" cy="82" r="41" fill="url(#grad-kether)"></circle><ellipse class="spec" cx="310" cy="63.96" rx="21.32" ry="12.299999999999999" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="310" cy="82" r="41.5" stroke="#ffffff" stroke-width="1.2"></circle><text class="glyph" x="310" y="83" style="font-size:33.62px">♆︎</text><text class="num" x="310" y="50">1</text><text class="name" x="310" y="140">Kether</text><text class="astro" x="310" y="157"><tspan class="sym">♆︎ </tspan>Neptuno</text></g><g class="node" data-key="chokmah" tabindex="0" role="button" aria-label="Chokmah, Urano"><circle class="halo" cx="494" cy="200" r="97.5" fill="url(#halo-chokmah)" filter="url(#soft)"></circle><circle class="disc" cx="494" cy="200" r="39" fill="url(#grad-chokmah)"></circle><ellipse class="spec" cx="494" cy="182.84" rx="20.28" ry="11.7" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="494" cy="200" r="39.5" stroke="#d9dce8" stroke-width="1.2"></circle><text class="glyph" x="494" y="201" style="font-size:31.979999999999997px">♅︎</text><text class="num" x="494" y="170">2</text><text class="name" x="494" y="256">Chokmah</text><text class="astro" x="494" y="273"><tspan class="sym">♅︎ </tspan>Urano</text></g><g class="node" data-key="binah" tabindex="0" role="button" aria-label="Binah, Saturno"><circle class="halo" cx="126" cy="200" r="97.5" fill="url(#halo-binah)" filter="url(#soft)"></circle><circle class="disc" cx="126" cy="200" r="39" fill="url(#grad-binah)"></circle><ellipse class="spec" cx="126" cy="182.84" rx="20.28" ry="11.7" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="126" cy="200" r="39.5" stroke="#b6a6e6" stroke-width="1.2"></circle><text class="glyph" x="126" y="201" style="font-size:31.979999999999997px">♄︎</text><text class="num" x="126" y="170">3</text><text class="name" x="126" y="256">Binah</text><text class="astro" x="126" y="273"><tspan class="sym">♄︎ </tspan>Saturno</text></g><g class="node" data-key="chesed" tabindex="0" role="button" aria-label="Chesed, Júpiter"><circle class="halo" cx="494" cy="404" r="97.5" fill="url(#halo-chesed)" filter="url(#soft)"></circle><circle class="disc" cx="494" cy="404" r="39" fill="url(#grad-chesed)"></circle><ellipse class="spec" cx="494" cy="386.84" rx="20.28" ry="11.7" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="494" cy="404" r="39.5" stroke="#8fbef0" stroke-width="1.2"></circle><text class="glyph" x="494" y="405" style="font-size:31.979999999999997px">♃︎</text><text class="num" x="494" y="374">4</text><text class="name" x="494" y="460">Chesed</text><text class="astro" x="494" y="477"><tspan class="sym">♃︎ </tspan>Júpiter</text></g><g class="node" data-key="geburah" tabindex="0" role="button" aria-label="Geburah, Marte"><circle class="halo" cx="126" cy="404" r="97.5" fill="url(#halo-geburah)" filter="url(#soft)"></circle><circle class="disc" cx="126" cy="404" r="39" fill="url(#grad-geburah)"></circle><ellipse class="spec" cx="126" cy="386.84" rx="20.28" ry="11.7" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="126" cy="404" r="39.5" stroke="#f39190" stroke-width="1.2"></circle><text class="glyph" x="126" y="405" style="font-size:31.979999999999997px">♂︎</text><text class="num" x="126" y="374">5</text><text class="name" x="126" y="460">Geburah</text><text class="astro" x="126" y="477"><tspan class="sym">♂︎ </tspan>Marte</text></g><g class="node" data-key="tiphareth" tabindex="0" role="button" aria-label="Tiphareth, Sol"><circle class="halo" cx="310" cy="496" r="115" fill="url(#halo-tiphareth)" filter="url(#soft)"></circle><circle class="disc" cx="310" cy="496" r="46" fill="url(#grad-tiphareth)"></circle><ellipse class="spec" cx="310" cy="475.76" rx="23.92" ry="13.799999999999999" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="310" cy="496" r="46.5" stroke="#ffe19a" stroke-width="1.2"></circle><text class="glyph" x="310" y="497" style="font-size:37.72px">☉︎</text><text class="num" x="310" y="459">6</text><text class="name" x="310" y="559">Tiphareth</text><text class="astro" x="310" y="576"><tspan class="sym">☉︎ </tspan>Sol</text></g><g class="node" data-key="netzach" tabindex="0" role="button" aria-label="Netzach, Venus"><circle class="halo" cx="494" cy="632" r="97.5" fill="url(#halo-netzach)" filter="url(#soft)"></circle><circle class="disc" cx="494" cy="632" r="39" fill="url(#grad-netzach)"></circle><ellipse class="spec" cx="494" cy="614.84" rx="20.28" ry="11.7" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="494" cy="632" r="39.5" stroke="#86dcb4" stroke-width="1.2"></circle><text class="glyph" x="494" y="633" style="font-size:31.979999999999997px">♀︎</text><text class="num" x="494" y="602">7</text><text class="name" x="494" y="688">Netzach</text><text class="astro" x="494" y="705"><tspan class="sym">♀︎ </tspan>Venus</text></g><g class="node" data-key="hod" tabindex="0" role="button" aria-label="Hod, Mercurio"><circle class="halo" cx="126" cy="632" r="97.5" fill="url(#halo-hod)" filter="url(#soft)"></circle><circle class="disc" cx="126" cy="632" r="39" fill="url(#grad-hod)"></circle><ellipse class="spec" cx="126" cy="614.84" rx="20.28" ry="11.7" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="126" cy="632" r="39.5" stroke="#f7b578" stroke-width="1.2"></circle><text class="glyph" x="126" y="633" style="font-size:31.979999999999997px">☿︎</text><text class="num" x="126" y="602">8</text><text class="name" x="126" y="688">Hod</text><text class="astro" x="126" y="705"><tspan class="sym">☿︎ </tspan>Mercurio</text></g><g class="node" data-key="yesod" tabindex="0" role="button" aria-label="Yesod, Luna"><circle class="halo" cx="310" cy="724" r="102.5" fill="url(#halo-yesod)" filter="url(#soft)"></circle><circle class="disc" cx="310" cy="724" r="41" fill="url(#grad-yesod)"></circle><ellipse class="spec" cx="310" cy="705.96" rx="21.32" ry="12.299999999999999" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="310" cy="724" r="41.5" stroke="#bda9ff" stroke-width="1.2"></circle><text class="glyph" x="310" y="725" style="font-size:33.62px">☽︎</text><text class="num" x="310" y="692">9</text><text class="name" x="310" y="782">Yesod</text><text class="astro" x="310" y="799"><tspan class="sym">☽︎ </tspan>Luna</text></g><g class="node" data-key="malkuth" tabindex="0" role="button" aria-label="Malkuth, Tierra"><circle class="halo" cx="310" cy="894" r="117.5" fill="url(#halo-malkuth)" filter="url(#soft)"></circle><circle class="disc" cx="310" cy="894" r="47" fill="url(#grad-malkuth)"></circle><ellipse class="spec" cx="310" cy="873.32" rx="24.44" ry="14.1" fill="rgba(255,255,255,.28)"></ellipse><circle class="ring" cx="310" cy="894" r="47.5" stroke="#e0b56b" stroke-width="1.2"></circle><text class="glyph" x="310" y="895" style="font-size:38.54px">⊕︎</text><text class="num" x="310" y="856">10</text><text class="name" x="310" y="958">Malkuth</text><text class="astro" x="310" y="975"><tspan class="sym">⊕︎ </tspan>Tierra</text></g></g></svg>
+  <div class="layers" role="group" aria-label="Capas">
+    <button id="btnAstros" aria-pressed="true">Astros</button>
+    <button id="btnCanales" aria-pressed="false">Canales</button>
+    <button id="btnTarot" aria-pressed="false">Tarot</button>
+  </div>
+  <div class="hint" id="hint">Pasa sobre una esfera para su significado</div>
+  <noscript>
+    <style>.layers,.hint{display:none}</style>
+    <p class="hint" style="display:block;max-width:34em">Vista estática: este visor
+      bloquea los scripts. Ábrelo en un navegador para las tres capas — Astros,
+      Canales y Tarot — y el detalle de cada esfera.</p>
+  </noscript>
+</main>
+<div id="tip" role="tooltip"></div>
+
+<script>
+const S = {
+  kether:{n:1,heb:"כתר",tr:"Kether",es:"Corona",x:310,y:82,r:41,col:"var(--k)",disc:"#ffffff",gl:"♆",
+    astro:"Neptuno",astroSub:"cúspide · variable",psy:"Espíritu · Unidad",world:"Atziluth · Mundo Divino",
+    meta:"El primer punto. Tradicionalmente el <b>Primum Mobile</b>; en clave moderna, <b>Neptuno</b> o <b>Plutón</b>.",
+    src:"Neptuno (fuente 7) · Plutón (2, 4)"},
+  chokmah:{n:2,heb:"חכמה",tr:"Chokmah",es:"Sabiduría",x:494,y:200,r:39,col:"var(--c)",disc:"#d9dce8",gl:"♅",
+    astro:"Urano",astroSub:"fuerza · zodíaco",psy:"Sabiduría · Vida",world:"Atziluth · Mundo Divino",
+    meta:"La chispa masculina. Tradicionalmente el <b>Zodíaco / estrellas fijas</b>; en clave moderna, <b>Urano</b>.",
+    src:"Urano (5, 7) · Neptuno (2, 4)"},
+  binah:{n:3,heb:"בינה",tr:"Binah",es:"Entendimiento",x:126,y:200,r:39,col:"var(--b)",disc:"#b6a6e6",gl:"♄",
+    astro:"Saturno",astroSub:"forma · límite",psy:"Entendimiento · Fe",world:"Atziluth · Mundo Divino",
+    meta:"La matriz que da forma. <b>Saturno</b>: el tiempo, la estructura, el límite. Sólido en todas las fuentes.",
+    src:"Saturno — unánime"},
+  chesed:{n:4,heb:"חסד",tr:"Chesed",es:"Misericordia",x:494,y:404,r:39,col:"var(--ch)",disc:"#8fbef0",gl:"♃",
+    astro:"Júpiter",astroSub:"expansión",psy:"Mente Superior · Amor",world:"Briah · Mundo Creativo",
+    meta:"La abundancia que da y organiza. <b>Júpiter</b>: expansión, benevolencia, orden generoso.",src:"Júpiter — unánime"},
+  geburah:{n:5,heb:"גבורה",tr:"Geburah",es:"Rigor",x:126,y:404,r:39,col:"var(--g)",disc:"#f39190",gl:"♂",
+    astro:"Marte",astroSub:"fuerza · corte",psy:"Voluntad · Justicia",world:"Briah · Mundo Creativo",
+    meta:"El corte que poda y protege. <b>Marte</b>: voluntad, disciplina, justicia severa.",src:"Marte — unánime"},
+  tiphareth:{n:6,heb:"תפארת",tr:"Tiphareth",es:"Belleza",x:310,y:496,r:46,col:"var(--t)",disc:"#ffe19a",gl:"☉",
+    astro:"Sol",astroSub:"corazón · centro",psy:"Ser Superior · Trascendencia",world:"Yetzirah · Mundo Formativo",
+    meta:"El corazón del árbol, donde todo converge. <b>El Sol</b>: el Yo esencial, la conciencia que armoniza.",src:"Sol — unánime"},
+  netzach:{n:7,heb:"נצח",tr:"Netzach",es:"Victoria",x:494,y:632,r:39,col:"var(--n)",disc:"#86dcb4",gl:"♀",
+    astro:"Venus",astroSub:"deseo · arte",psy:"Emociones · Sentimientos",world:"Yetzirah · Mundo Formativo",
+    meta:"El fuego del deseo y la belleza sentida. <b>Venus</b>: emoción, arte, atracción.",src:"Venus — unánime"},
+  hod:{n:8,heb:"הוד",tr:"Hod",es:"Esplendor",x:126,y:632,r:39,col:"var(--h)",disc:"#f7b578",gl:"☿",
+    astro:"Mercurio",astroSub:"mente · lenguaje",psy:"Intelecto · Lenguaje",world:"Yetzirah · Mundo Formativo",
+    meta:"La mente que nombra y ordena. <b>Mercurio</b>: intelecto, lenguaje, forma abstracta.",src:"Mercurio — unánime"},
+  yesod:{n:9,heb:"יסוד",tr:"Yesod",es:"Fundamento",x:310,y:724,r:41,col:"var(--y)",disc:"#bda9ff",gl:"☽",
+    astro:"Luna",astroSub:"psique · patrón",psy:"Vitalidad · Patrones",world:"Yetzirah · Mundo Formativo",
+    meta:"El depósito de la imaginación y los ciclos. <b>La Luna</b>: psique, sueños, el patrón antes de encarnar.",src:"Luna — unánime"},
+  malkuth:{n:10,heb:"מלכות",tr:"Malkuth",es:"Reino",x:310,y:894,r:47,col:"var(--m)",disc:"#e0b56b",gl:"⊕",
+    astro:"Tierra",astroSub:"elementos · cuerpo",psy:"Cuerpo · Herencia",world:"Assiah · Mundo Físico",
+    meta:"El fruto encarnado. <b>La Tierra y los 4 Elementos</b>: la materia donde todo se hace cuerpo.",src:"Tierra / Elementos — unánime"}
+};
+// paths: [a, b, hebLetter, letterName, astro, tarot]
+const P = [
+  ["kether","chokmah","א","Aleph","Aire","El Loco"],
+  ["kether","binah","ב","Beth","Mercurio","El Mago"],
+  ["kether","tiphareth","ג","Gimel","Luna","La Sacerdotisa"],
+  ["chokmah","binah","ד","Daleth","Venus","La Emperatriz"],
+  ["chokmah","tiphareth","ה","Heh","Aries","El Emperador"],
+  ["chokmah","chesed","ו","Vav","Tauro","El Hierofante"],
+  ["binah","tiphareth","ז","Zayin","Géminis","Los Enamorados"],
+  ["binah","geburah","ח","Cheth","Cáncer","El Carro"],
+  ["chesed","geburah","ט","Teth","Leo","La Fuerza"],
+  ["chesed","tiphareth","י","Yod","Virgo","El Ermitaño"],
+  ["chesed","netzach","כ","Kaph","Júpiter","La Rueda"],
+  ["geburah","tiphareth","ל","Lamed","Libra","La Justicia"],
+  ["geburah","hod","מ","Mem","Agua","El Colgado"],
+  ["tiphareth","netzach","נ","Nun","Escorpio","La Muerte"],
+  ["tiphareth","yesod","ס","Samekh","Sagitario","La Templanza"],
+  ["tiphareth","hod","ע","Ayin","Capricornio","El Diablo"],
+  ["netzach","hod","פ","Peh","Marte","La Torre"],
+  ["netzach","yesod","צ","Tzaddi","Acuario","La Estrella"],
+  ["netzach","malkuth","ק","Qoph","Piscis","La Luna"],
+  ["hod","yesod","ר","Resh","Sol","El Sol"],
+  ["hod","malkuth","ש","Shin","Fuego","El Juicio"],
+  ["yesod","malkuth","ת","Tau","Saturno","El Mundo"]
+];
+const GLYPH={Aries:"♈",Tauro:"♉",Géminis:"♊",Cáncer:"♋",Leo:"♌",Virgo:"♍",Libra:"♎",Escorpio:"♏",
+  Sagitario:"♐",Capricornio:"♑",Acuario:"♒",Piscis:"♓",Sol:"☉",Luna:"☽",Mercurio:"☿",Venus:"♀",
+  Marte:"♂",Júpiter:"♃",Saturno:"♄",Aire:"△",Fuego:"▲",Agua:"▽"};
+const ASTROGLYPH={Sol:"☉",Luna:"☽",Mercurio:"☿",Venus:"♀",Marte:"♂",Júpiter:"♃",Saturno:"♄",
+  Urano:"♅",Neptuno:"♆",Plutón:"♇",Tierra:"⊕"};
+// ── Tarot layer ──
+// Path order 11→32 runs the Majors 0→XXI in sequence, so a path's index IS its
+// arcanum number. Badges show arabic numerals (legible on a phone); the tooltip
+// carries the roman numeral and the full name.
+const ROMAN=["0","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII",
+  "XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
+const PIP=["As","Dos","Tres","Cuatro","Cinco","Seis","Siete","Ocho","Nueve","Diez"];
+const PIPPL=["Ases","Doses","Treses","Cuatros","Cincos","Seises","Sietes","Ochos","Nueves","Dieces"];
+// Each Sephirah is one rung of the pip ladder, repeated once per suit — and each
+// suit is one of the four Worlds.
+const SUITS=[["Bastos","Fuego","Atziluth"],["Copas","Agua","Briah"],
+  ["Espadas","Aire","Yetzirah"],["Oros","Tierra","Assiah"]];
+// Where the sources genuinely disagree, say so on the card itself rather than
+// silently picking a side. Keyed by path index.
+const PNOTE={
+  4:"Crowley (Liber AL I:57, «Tzaddi no es la Estrella») pone aquí La Estrella y manda este arcano al sendero 28. Ojo: las letras y sus signos no se mueven — se mueven las cartas.",
+  17:"Crowley intercambia este arcano con El Emperador (sendero 15). La Golden Dawn y el Book T mantienen Tzaddi = La Estrella = Acuario.",
+  20:"El Book T lo da como Espíritu y Fuego.",
+  21:"El Book T lo da como Tierra y Saturno."
+};
+
+// Force text (monochrome) presentation: without U+FE0E the zodiac signs fall back
+// to colour-emoji fonts and render as coloured blobs instead of clean glyphs.
+const TXT="\uFE0E";
+for(const k in GLYPH) GLYPH[k]+=TXT;
+for(const k in ASTROGLYPH) ASTROGLYPH[k]+=TXT;
+for(const k in S) S[k].gl+=TXT;
+
+const NS="http://www.w3.org/2000/svg";
+const svg=document.getElementById("tree");
+// The shareable build bakes a rendered copy of the tree into the file so it still
+// shows where scripts are blocked (mobile mail previews). If that copy is present,
+// drop it and rebuild from scratch — otherwise everything would appear twice.
+while(svg.firstChild) svg.removeChild(svg.firstChild);
+const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+
+const defs=el("defs",{});
+for(const key in S){
+  const s=S[key];
+  const g=el("radialGradient",{id:"grad-"+key,cx:"50%",cy:"40%",r:"66%"});
+  g.appendChild(el("stop",{offset:"0%","stop-color":s.disc,"stop-opacity":"1"}));
+  g.appendChild(el("stop",{offset:"58%","stop-color":s.col,"stop-opacity":".96"}));
+  g.appendChild(el("stop",{offset:"100%","stop-color":s.col,"stop-opacity":".55"}));
+  defs.appendChild(g);
+  const h=el("radialGradient",{id:"halo-"+key,cx:"50%",cy:"50%",r:"50%"});
+  h.appendChild(el("stop",{offset:"0%","stop-color":s.col,"stop-opacity":".85"}));
+  h.appendChild(el("stop",{offset:"55%","stop-color":s.col,"stop-opacity":".22"}));
+  h.appendChild(el("stop",{offset:"100%","stop-color":s.col,"stop-opacity":"0"}));
+  defs.appendChild(h);
+}
+const blur=el("filter",{id:"soft",x:"-80%",y:"-80%",width:"260%",height:"260%"});
+blur.appendChild(el("feGaussianBlur",{stdDeviation:"9"}));
+defs.appendChild(blur);
+// soft light pool that cradles the whole tree
+const aura=el("radialGradient",{id:"treeAura",cx:"50%",cy:"50%",r:"50%"});
+aura.appendChild(el("stop",{offset:"0%","stop-color":"#7a6cd0","stop-opacity":".18"}));
+aura.appendChild(el("stop",{offset:"48%","stop-color":"#4a4a96","stop-opacity":".06"}));
+aura.appendChild(el("stop",{offset:"100%","stop-color":"#4a4a96","stop-opacity":"0"}));
+defs.appendChild(aura);
+svg.appendChild(defs);
+
+// ── background layer: aura + geometric ripples from the heart (Tiphareth) ──
+const gBg=el("g",{"pointer-events":"none"});svg.appendChild(gBg);
+gBg.appendChild(el("ellipse",{cx:310,cy:500,rx:335,ry:470,fill:"url(#treeAura)"}));
+[150,255,360,470].forEach((rr,i)=>gBg.appendChild(el("circle",{cx:310,cy:496,r:rr,fill:"none",
+  stroke:"rgba(160,148,228,"+(0.07-i*0.013)+")","stroke-width":"1"})));
+
+const gPaths=el("g",{}),gDaath=el("g",{}),gNodes=el("g",{});
+svg.append(gPaths,gDaath,gNodes);
+
+// Badges sit at each channel's midpoint — but a few midpoints collide (Samekh and
+// Peh cross dead centre, 22 units apart). Nudge the loser along its own line so no
+// two badges overlap, keeping every glyph readable.
+const BPOS=P.map((p,i)=>{const a=S[p[0]],b=S[p[1]];
+  return {x:(a.x+b.x)/2,y:(a.y+b.y)/2,ax:a.x,ay:a.y,bx:b.x,by:b.y};});
+for(let i=0;i<BPOS.length;i++)for(let j=i+1;j<BPOS.length;j++){
+  const A=BPOS[i],B=BPOS[j];
+  if(Math.hypot(A.x-B.x,A.y-B.y)>=36) continue;
+  const ux=B.bx-B.ax, uy=B.by-B.ay, L=Math.hypot(ux,uy), sh=21;
+  const c1={x:B.x+ux/L*sh,y:B.y+uy/L*sh}, c2={x:B.x-ux/L*sh,y:B.y-uy/L*sh};
+  const far = Math.hypot(c1.x-A.x,c1.y-A.y)>Math.hypot(c2.x-A.x,c2.y-A.y) ? c1 : c2;
+  B.x=far.x; B.y=far.y;
+}
+
+P.forEach((p,i)=>{
+  const a=S[p[0]],b=S[p[1]];
+  const grp=el("g",{class:"path-g","data-i":i,tabindex:"0",role:"button","aria-label":"Sendero "+p[3]+", "+p[4]});
+  grp.appendChild(el("line",{class:"path-line",x1:a.x,y1:a.y,x2:b.x,y2:b.y}));
+  const mx=BPOS[i].x,my=BPOS[i].y;
+  const badge=el("g",{class:"chan-badge"});
+  badge.appendChild(el("circle",{cx:mx,cy:my,r:14}));
+  const tx=el("text",{x:mx,y:my+.5});tx.textContent=GLYPH[p[4]]||p[2];badge.appendChild(tx);
+  // trim the hit area so it starts clear of both spheres — otherwise a channel
+  // would be hoverable underneath an orb and fight with it
+  const dx=b.x-a.x, dy=b.y-a.y, len=Math.hypot(dx,dy), ux=dx/len, uy=dy/len;
+  const padA=a.r+10, padB=b.r+10;
+  const hit=el("line",{class:"path-hit",
+    x1:a.x+ux*padA, y1:a.y+uy*padA, x2:b.x-ux*padB, y2:b.y-uy*padB});
+  grp.append(badge,hit);
+  grp.addEventListener("mouseenter",e=>tipPath(i,e));
+  grp.addEventListener("mousemove",moveTip);
+  grp.addEventListener("mouseleave",hideTip);
+  grp.addEventListener("click",e=>{e.stopPropagation();tipPath(i,e);});
+  grp.addEventListener("focus",e=>tipPath(i,{clientX:innerWidth/2,clientY:120}));
+  grp.addEventListener("blur",hideTip);
+  gPaths.appendChild(grp);
+});
+
+gDaath.appendChild(el("circle",{class:"daath",cx:310,cy:312,r:22}));
+const dtt=el("text",{class:"daath-t",x:310,y:316});dtt.textContent="דעת";gDaath.appendChild(dtt);
+
+for(const key in S){
+  const s=S[key];
+  const g=el("g",{class:"node","data-key":key,tabindex:"0",role:"button","aria-label":s.tr+", "+s.astro});
+  g.appendChild(el("circle",{class:"halo",cx:s.x,cy:s.y,r:s.r*2.5,fill:"url(#halo-"+key+")",filter:"url(#soft)"}));
+  g.appendChild(el("circle",{class:"disc",cx:s.x,cy:s.y,r:s.r,fill:"url(#grad-"+key+")"}));
+  // specular top highlight — gives the orb a lit, spherical feel
+  g.appendChild(el("ellipse",{class:"spec",cx:s.x,cy:s.y-s.r*0.44,rx:s.r*0.52,ry:s.r*0.30,
+    fill:"rgba(255,255,255,.28)"}));
+  g.appendChild(el("circle",{class:"ring",cx:s.x,cy:s.y,r:s.r+0.5,stroke:s.disc,"stroke-width":"1.2"}));
+  const gl=el("text",{class:"glyph",x:s.x,y:s.y+1,style:"font-size:"+(s.r*.82)+"px"});gl.textContent=s.gl;
+  g.appendChild(gl);
+  const num=el("text",{class:"num",x:s.x,y:s.y-s.r+9});num.textContent=s.n;g.appendChild(num);
+  const nm=el("text",{class:"name",x:s.x,y:s.y+s.r+17});nm.textContent=s.tr;g.appendChild(nm);
+  const as=el("text",{class:"astro",x:s.x,y:s.y+s.r+34});
+  const sym=el("tspan",{class:"sym"});sym.textContent=(ASTROGLYPH[s.astro]||s.gl)+" ";
+  as.appendChild(sym);as.appendChild(document.createTextNode(s.astro));g.appendChild(as);
+  g.addEventListener("mouseenter",e=>tipNode(key,e));
+  g.addEventListener("mousemove",moveTip);
+  g.addEventListener("mouseleave",hideTip);
+  g.addEventListener("click",e=>{e.stopPropagation();tipNode(key,e);});
+  g.addEventListener("focus",()=>tipNode(key,{clientX:innerWidth/2,clientY:120}));
+  g.addEventListener("blur",hideTip);
+  gNodes.appendChild(g);
+}
+
+// ── tooltip ──
+const tip=document.getElementById("tip");
+function tipNode(key,e){
+  const s=S[key];
+  const head=`<div class="th"><span class="heb" style="color:${s.col}">${s.heb}</span>
+      <span class="tt">${s.tr} <small>· ${s.es}</small></span></div>`;
+  if(mode==="tarot"){
+    const cards=SUITS.map(([suit,elm,world])=>
+      `${PIP[s.n-1]} de ${suit} <span style="color:var(--faint)">· ${elm} · ${world}</span>`).join("<br>");
+    tip.innerHTML=head+`
+      <div class="arow"><span class="s">${s.n===1?"A":s.n}</span> <b>Los cuatro ${PIPPL[s.n-1]}</b></div>
+      <div class="meta">Cada palo repite este peldaño en su Mundo:<br>${cards}</div>
+      <div class="src">Los 40 números son las 10 Sephirot × 4 palos · el Book T fija
+        los palos y sus elementos, pero no tabula los cuatro Mundos: esa capa es
+        convención posterior</div>`;
+  }else{
+    tip.innerHTML=head+`
+      <div class="arow"><span class="s">${ASTROGLYPH[s.astro]||s.gl}</span> <b>${s.astro}</b>
+        <span style="color:var(--faint);font-size:12px">· ${s.astroSub}</span></div>
+      <div class="meta"><b>Psique:</b> ${s.psy}<br>${s.meta}</div>
+      <div class="src">${s.world} · ${s.src}</div>`;
+  }
+  showTip(e);
+}
+function tipPath(i,e){
+  const p=P[i],a=S[p[0]],b=S[p[1]];
+  const kind=["Aries","Tauro","Géminis","Cáncer","Leo","Virgo","Libra","Escorpio","Sagitario","Capricornio","Acuario","Piscis"].includes(p[4])?"Signo":
+    ["Aire","Fuego","Agua"].includes(p[4])?"Elemento":"Planeta";
+  if(mode==="tarot"){
+    tip.innerHTML=`
+      <div class="th"><span class="heb" style="color:var(--gold)">${ROMAN[i]}</span>
+        <span class="tt">${p[5]} <small>· arcano ${i}</small></span></div>
+      <div class="arow"><span class="s">${GLYPH[p[4]]||""}</span> <b>${p[4]}</b>
+        <span style="color:var(--faint);font-size:12px">· ${kind}</span></div>
+      <div class="meta"><b>Letra:</b> ${p[2]} ${p[3]}<br>Une ${a.tr} con ${b.tr}.${
+        PNOTE[i]?`<br><span style="color:var(--gold)">⚑</span> ${PNOTE[i]}`:""}</div>
+      <div class="src">Sendero ${i+11} · los 22 Arcanos Mayores son los 22 canales</div>`;
+  }else{
+    tip.innerHTML=`
+      <div class="th"><span class="heb">${p[2]}</span>
+        <span class="tt">${p[3]} <small>· sendero ${i+11}</small></span></div>
+      <div class="arow"><span class="s">${GLYPH[p[4]]||""}</span> <b>${p[4]}</b>
+        <span style="color:var(--faint);font-size:12px">· ${kind}</span></div>
+      <div class="meta"><b>Arcano:</b> ${p[5]}<br>Une ${a.tr} (${a.astro}) con ${b.tr} (${b.astro}).</div>
+      <div class="src">22 canales = 3 elementos + 7 planetas + 12 signos</div>`;
+  }
+  showTip(e);
+}
+function showTip(e){tip.classList.add("on");moveTip(e);document.getElementById("hint").style.opacity=".35";}
+function moveTip(e){
+  if(matchMedia("(max-width:640px)").matches)return; // docked as bottom sheet on mobile
+  if(!e||e.clientX==null)return;
+  const pad=16,w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=e.clientX+18,y=e.clientY+18;
+  if(x+w+pad>innerWidth)x=e.clientX-w-18;
+  if(y+h+pad>innerHeight)y=e.clientY-h-18;
+  tip.style.left=Math.max(pad,x)+"px";tip.style.top=Math.max(pad,y)+"px";
+}
+function hideTip(){tip.classList.remove("on");}
+
+// ── layers ──
+let mode="astros";
+const HINTS={
+  astros:"Toca una esfera para su significado",
+  canales:"Cada canal lleva su signo — toca uno para el Arcano",
+  tarot:"22 Arcanos en los canales · 40 números en las esferas"
+};
+function setMode(m){
+  mode=m;
+  svg.classList.toggle("channels",m==="canales");
+  svg.classList.toggle("tarot",m==="tarot");
+  btnA.setAttribute("aria-pressed",m==="astros");
+  btnC.setAttribute("aria-pressed",m==="canales");
+  btnT.setAttribute("aria-pressed",m==="tarot");
+  // spheres: planet glyph + planet name, or pip rank + "los cuatro N"
+  for(const key in S){
+    const s=S[key], g=document.querySelector('.node[data-key="'+key+'"]');
+    const gl=g.querySelector('.glyph'), as=g.querySelector('.astro');
+    if(m==="tarot"){
+      gl.textContent = s.n===1 ? "A" : String(s.n);
+      as.textContent = "Los cuatro "+PIPPL[s.n-1];
+    }else{
+      gl.textContent = s.gl;
+      as.textContent="";
+      const sym=el("tspan",{class:"sym"});
+      sym.textContent=(ASTROGLYPH[s.astro]||s.gl)+" ";
+      as.append(sym,document.createTextNode(s.astro));
+    }
+  }
+  // channel badges: zodiac/planet/element glyph, or arcanum number
+  document.querySelectorAll('.path-g').forEach(pg=>{
+    const i=+pg.dataset.i, t=pg.querySelector('.chan-badge text');
+    t.textContent = m==="tarot" ? String(i) : (GLYPH[P[i][4]]||P[i][2]);
+  });
+  document.getElementById("hint").textContent=HINTS[m];
+}
+const btnA=document.getElementById("btnAstros"),
+      btnC=document.getElementById("btnCanales"),
+      btnT=document.getElementById("btnTarot");
+btnA.onclick=()=>setMode("astros");
+btnC.onclick=()=>setMode("canales");
+btnT.onclick=()=>setMode("tarot");
+// tap on empty space dismisses the tooltip (mobile + desktop)
+document.querySelector(".stage").addEventListener("click",hideTip);
+svg.addEventListener("click",e=>{if(e.target===svg)hideTip();});
+
+// ── starfield ──
+const cv=document.getElementById("stars"),ctx=cv.getContext("2d");
+let W,H,stars=[],reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;
+  const n=Math.min(220,Math.floor(W*H/9000));stars=[];
+  for(let i=0;i<n;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.3+.2,
+    tw:Math.random()*.02+.004,h:Math.random()<.15?[250,45][Math.floor(Math.random()*2)]:0});}
+resize();addEventListener("resize",resize);
+let t=0;
+function draw(){t++;ctx.clearRect(0,0,W,H);
+  for(const s of stars){
+    const al=.22+Math.abs(Math.sin(t*s.tw+s.x))*.62;
+    ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,7);
+    ctx.fillStyle=s.h?`hsla(${s.h},70%,80%,${al})`:`rgba(232,230,246,${al})`;ctx.fill();
+  }
+  if(!reduce)requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>
