@@ -141,6 +141,9 @@
     .layers{margin-top:14px}
     .layers button{padding:15px 17px;font-size:12.5px}
     .path-hit{stroke-width:24}
+    /* three words now — ease the tracking so the eyebrow clears the narrowest
+       phones (iPhone SE, 320px) without clipping */
+    .eyebrow{letter-spacing:.26em}
     /* tooltip docks as a bottom sheet on touch screens */
     #tip{left:10px;right:10px;bottom:12px;top:auto!important;max-width:none;
       transform:translateY(120%);border-radius:16px;padding:16px 18px}
@@ -153,7 +156,7 @@
 <canvas id="stars"></canvas>
 <main class="stage">
   <div class="masthead">
-    <div class="eyebrow">Cábala · Astrología</div>
+    <div class="eyebrow">Cábala · Astrología · Tarot</div>
     <h1>El Árbol de la <b>Vida</b> viviente</h1>
     <p>Diez esferas y veintidós canales. Tres lecturas del mismo árbol: los astros, los signos y el Tarot.</p>
   </div>
